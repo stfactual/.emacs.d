@@ -174,7 +174,7 @@ it to the beginning of the line."
   ;; If you edit it by hand, you could mess it up, so be careful.
   ;; Your init file should contain only one such instance.
   ;; If there is more than one, they won't work right.
- '(default ((t (:height 140 :family "Monaco")))))
+ '(default ((t (:inherit nil :stipple nil :background "#242424" :foreground "#f6f3e8" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 80 :width normal :foundry "unknown" :family "Monospace")))))
 
 ;; enable awesome file prompting
 (when (> emacs-major-version 21)
@@ -350,3 +350,14 @@ Leave one space or none, according to the context."
 
 (require 'ace-jump-mode)
 (define-key global-map (kbd "C-c SPC") 'ace-jump-mode)
+
+(custom-set-variables
+  ;; custom-set-variables was added by Custom.
+  ;; If you edit it by hand, you could mess it up, so be careful.
+  ;; Your init file should contain only one such instance.
+  ;; If there is more than one, they won't work right.
+ '(column-number-mode t)
+ '(ace-jump-mode t)
+ '(menu-bar-mode nil)
+ '(show-paren-mode t)
+ '(tool-bar-mode nil))
