@@ -32,7 +32,7 @@
 ;; default frame size
 ;(add-to-list 'default-frame-alist (cons 'height 24))
 ;(add-to-list 'default-frame-alist (cons 'width 80))
-(add-to-list 'default-frame-alist '(alpha 85 75))
+;(add-to-list 'default-frame-alist '(alpha 85 75))
 
 ;; f5
 (global-set-key [f5] 'revert-buffer)
@@ -59,7 +59,7 @@
   (add-hook (first (read-from-string (concat (symbol-name mode) "-mode-hook")))
             (lambda ()
             (paredit-mode 1)
-            (local-set-key (kbd "<M-left>") 'paredit-convolute-sexp)
+;;            (local-set-key (kbd "<M-left>") 'paredit-convolute-sexp)
 ;;            (auto-complete-mode 1)
 )))
 
@@ -174,7 +174,10 @@ it to the beginning of the line."
   ;; If you edit it by hand, you could mess it up, so be careful.
   ;; Your init file should contain only one such instance.
   ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :stipple nil :background "#242424" :foreground "#f6f3e8" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 80 :width normal :foundry "unknown" :family "Monospace")))))
+ '(default ((t (:inherit nil :stipple nil :background "black" :foreground "#f6f3e8"
+                :inverse-video nil :box nil :strike-through nil :overline nil
+                :underline nil :slant normal :weight normal :height 70 :width normal
+                :foundry "unknown" :family "Monospace")))))
 
 ;; enable awesome file prompting
 (when (> emacs-major-version 21)
@@ -330,6 +333,9 @@ Leave one space or none, according to the context."
 (global-set-key (kbd "<s-wheel-up>") 'text-scale-increase)
 (global-set-key (kbd "<s-wheel-down>") 'text-scale-decrease)
 
+(global-set-key (kbd "<s-mouse-4>") 'text-scale-increase)
+(global-set-key (kbd "<s-mouse-5>") 'text-scale-decrease)
+
 (defun find-init-file ()
   "Visit init.el."
   (interactive)
@@ -357,7 +363,9 @@ Leave one space or none, according to the context."
   ;; Your init file should contain only one such instance.
   ;; If there is more than one, they won't work right.
  '(column-number-mode t)
- '(ace-jump-mode t)
  '(menu-bar-mode nil)
  '(show-paren-mode t)
  '(tool-bar-mode nil))
+
+(add-to-list 'default-frame-alist '(alpha 97 15))
+(add-to-list 'default-frame-alist '(background-color . "black"))
