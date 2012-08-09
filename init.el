@@ -356,6 +356,7 @@ Leave one space or none, according to the context."
 
 (require 'ace-jump-mode)
 (define-key global-map (kbd "C-c SPC") 'ace-jump-mode)
+(define-key global-map (kbd "C-c C-SPC") 'ace-jump-mode)
 
 (custom-set-variables
   ;; custom-set-variables was added by Custom.
