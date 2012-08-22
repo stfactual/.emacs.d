@@ -6,6 +6,7 @@
 ;; tab width as two, using spaces
 (setq default-tab-width 2)
 (setq-default indent-tabs-mode nil)
+(setq-default fill-column 80)
 
 ;;; This was installed by package-install.el.
 ;;; This provides support for the package system and
@@ -18,6 +19,7 @@
   (package-initialize))
 
 ;; add all subdirs of ~/.emacs.d to your load-path
+(add-to-list 'load-path "~/.emacs.d")
 (dolist (f (file-expand-wildcards "~/.emacs.d/*"))
   (add-to-list 'load-path f))
 
@@ -168,6 +170,19 @@ it to the beginning of the line."
 
 (global-set-key (kbd "C-c c") 'toggle-truncate-lines)
 (global-set-key (kbd "C-c ;") 'comment-or-uncomment-region)
+
+(defun transpose-windows ()
+  (interactive)
+  (let ((this-buffer (window-buffer (selected-window)))
+        (other-buffer (prog2
+                          (other-window +1)
+                          (window-buffer (selected-window))
+                        (other-window -1))))
+    (switch-to-buffer other-buffer)
+    (switch-to-buffer-other-window this-buffer)
+    (other-window -1)))
+
+(global-set-key (kbd "<s-S-right>") 'transpose-windows)
 
 (custom-set-faces
   ;; custom-set-faces was added by Custom.
@@ -358,15 +373,23 @@ Leave one space or none, according to the context."
 (define-key global-map (kbd "C-c SPC") 'ace-jump-mode)
 (define-key global-map (kbd "C-c C-SPC") 'ace-jump-mode)
 
+(require 'fill-column-indicator)
+(setq fci-rule-color "#222222")
+
 (custom-set-variables
   ;; custom-set-variables was added by Custom.
   ;; If you edit it by hand, you could mess it up, so be careful.
   ;; Your init file should contain only one such instance.
   ;; If there is more than one, they won't work right.
- '(column-number-mode t)
  '(menu-bar-mode nil)
  '(show-paren-mode t)
  '(tool-bar-mode nil))
 
+(add-to-list 'default-frame-alist '(width . 84))
 (add-to-list 'default-frame-alist '(alpha 97 15))
 (add-to-list 'default-frame-alist '(background-color . "black"))
+
+(add-hook 'prog-mode-hook 'auto-fill-mode)
+(add-hook 'prog-mode-hook 'fci-mode)
+
+(setq-default c-basic-offset 2)
