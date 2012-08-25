@@ -9,10 +9,13 @@
 	url = https://github.com/m2ym/auto-complete.git
 [submodule "clojure-mode"]
 	path = clojure-mode
-	url = https://github.com/technomancy/clojure-mode.git
+	url = https://github.com/stfactual/clojure-mode.git
 [submodule "popup-el"]
 	path = popup-el
 	url = https://github.com/m2ym/popup-el.git
 [submodule "ace-jump"]
 	path = ace-jump
 	url = https://github.com/winterTTr/ace-jump-mode.git
+[submodule "swankr"]
+	path = swankr
+	url = https://github.com/stfactual/swankr.git
