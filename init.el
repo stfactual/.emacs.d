@@ -6,7 +6,7 @@
 ;; tab width as two, using spaces
 (setq default-tab-width 2)
 (setq-default indent-tabs-mode nil)
-(setq-default fill-column 80)
+(setq-default fill-column 100)
 
 ;;; This was installed by package-install.el.
 ;;; This provides support for the package system and
@@ -237,12 +237,12 @@ it to the beginning of the line."
                           (when (string-match "Connection opened on" output)
                             (slime-connect "localhost" slime-port)
                             (set-process-filter process nil))))
-    (message "Starting swank server...")))
+    (message "Starting lein-swank server...")))
 
 (defun kill-lein-swank ()
   (interactive)
   (kill-process (get-buffer-process "*lein-swank*"))
-  (message "Stopping swank server..."))
+  (message "Stopping lein-swank server..."))
 
 (global-set-key (kbd "s-=") 'lein-swank)
 (global-set-key (kbd "s-+") 'kill-lein-swank)
@@ -385,7 +385,7 @@ Leave one space or none, according to the context."
  '(show-paren-mode t)
  '(tool-bar-mode nil))
 
-(add-to-list 'default-frame-alist '(width . 84))
+(add-to-list 'default-frame-alist '(width . 112))
 (add-to-list 'default-frame-alist '(alpha 97 15))
 (add-to-list 'default-frame-alist '(background-color . "black"))
 
@@ -393,3 +393,27 @@ Leave one space or none, according to the context."
 (add-hook 'prog-mode-hook 'fci-mode)
 
 (setq-default c-basic-offset 2)
+
+;; R-swank setup
+(add-hook 'ess-mode-hook
+  (lambda ()
+    (setq defun-prompt-regexp "^\\(\\(\\sw\\|\\s_\\)+\\|\\s\"\\S\"+\\s\"\\)\\s-*\\(=\\|<-\\)\\s-*function\\s-*(.*)\\s-*")))
+
+(defun r-swank ()
+  (interactive)
+  (shell-command (format "source ~/.bashrc && cd %s && R --no-save <<<\"source('%s/.emacs.d/swankr/swank.R', keep.source=TRUE, chdir=TRUE)\nstartSwank('%s')\n\" &" default-directory (getenv "HOME") slime-port)
+                 "*r-swank*")
+  (set-process-filter (get-buffer-process "*r-swank*")
+                        (lambda (process output)
+                          (when (string-match "startSwank" output)
+                            (slime-connect "localhost" slime-port)
+                            (set-process-filter process nil))))
+  (message "Starting r-swank server..."))
+
+(defun kill-r-swank ()
+  (interactive)
+  (kill-process (get-buffer-process "*r-swank*"))
+  (message "Stopping r-swank server..."))
+
+(global-set-key (kbd "s--") 'r-swank)
+(global-set-key (kbd "s-_") 'kill-r-swank)
