@@ -423,7 +423,7 @@ Leave one space or none, according to the context."
   (if (looking-at "\\<") () (re-search-backward "\\<" (point-min)))
   (isearch-forward))
 
-(global-set-key (kbd "C-S") 'find-word-under-cursor)
+(global-set-key (kbd "s-s") 'find-word-under-cursor)
 
 ;; http://hugoheden.wordpress.com/2009/03/08/copypaste-with-emacs-in-terminal/
 ;; I prefer using the "clipboard" selection (the one the
@@ -462,3 +462,51 @@ Leave one space or none, according to the context."
   ;; http://shreevatsa.wordpress.com/2006/10/22/emacs-copypaste-and-x/
   ;; http://www.mail-archive.com/help-gnu-emacs@gnu.org/msg03577.html
  ))
+
+(defun goto-match-paren (arg)
+  "Go to the matching parenthesis if on parenthesis AND last command is a movement command, otherwise insert %.
+vi style of % jumping to matching brace."
+  (interactive "p")
+  (message "%s" last-command)
+  (if (not (memq last-command '(
+                                set-mark
+                                cua-set-mark
+                                goto-match-paren
+                                down-list
+                                up-list
+                                end-of-defun
+                                beginning-of-defun
+                                backward-sexp
+                                forward-sexp
+                                backward-up-list
+                                forward-paragraph
+                                backward-paragraph
+                                end-of-buffer
+                                beginning-of-buffer
+                                backward-word
+                                forward-word
+                                mwheel-scroll
+                                backward-word
+                                forward-word
+                                mouse-start-secondary
+                                mouse-yank-secondary
+                                mouse-secondary-save-then-kill
+                                move-end-of-line
+                                move-beginning-of-line
+                                backward-char
+                                forward-char
+                                scroll-up
+                                scroll-down
+                                scroll-left
+                                scroll-right
+                                mouse-set-point
+                                next-buffer
+                                previous-buffer
+                                )
+                 ))
+      (self-insert-command (or arg 1))
+    (cond ((looking-at "\\s\(") (forward-list 1) (backward-char 1))
+          ((looking-at "\\s\)") (forward-char 1) (backward-list 1))
+          (t (self-insert-command (or arg 1))))))
+
+(global-set-key (kbd "%") 'goto-match-paren)
