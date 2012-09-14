@@ -385,7 +385,7 @@ Leave one space or none, according to the context."
  '(show-paren-mode t)
  '(tool-bar-mode nil))
 
-(add-to-list 'default-frame-alist '(width . 112))
+(add-to-list 'default-frame-alist '(width . 214))
 (add-to-list 'default-frame-alist '(alpha 97 15))
 (add-to-list 'default-frame-alist '(background-color . "black"))
 
@@ -454,14 +454,14 @@ Leave one space or none, according to the context."
     ;; kill-ring will be used.
     (let ((xsel-output (shell-command-to-string "xsel --clipboard --output")))
       (unless (string= (car kill-ring) xsel-output)
-  xsel-output )))
+        xsel-output)))
   ;; Attach callbacks to hooks
   (setq interprogram-cut-function 'xsel-cut-function)
   (setq interprogram-paste-function 'xsel-paste-function)
   ;; Idea from
   ;; http://shreevatsa.wordpress.com/2006/10/22/emacs-copypaste-and-x/
   ;; http://www.mail-archive.com/help-gnu-emacs@gnu.org/msg03577.html
- ))
+  ))
 
 (defun goto-match-paren (arg)
   "Go to the matching parenthesis if on parenthesis AND last command is a movement command, otherwise insert %.
@@ -509,4 +509,16 @@ vi style of % jumping to matching brace."
           ((looking-at "\\s\)") (forward-char 1) (backward-list 1))
           (t (self-insert-command (or arg 1))))))
 
-(global-set-key (kbd "%") 'goto-match-paren)
+;; Used only when not in viper mode
+; (global-set-key (kbd "%") 'goto-match-paren)
+
+(setq scroll-step 1)
+(setq scroll-conservatively 10000)
+(setq auto-window-vscroll nil)
+
+(setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
+(setq mouse-wheel-progressive-speed t) ;; accelerate scrolling
+(setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
+
+(setq viper-mode t)
+(require 'viper)
