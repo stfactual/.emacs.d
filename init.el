@@ -520,5 +520,5 @@ vi style of % jumping to matching brace."
 (setq mouse-wheel-progressive-speed t) ;; accelerate scrolling
 (setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
 
-(setq viper-mode t)
-(require 'viper)
+(require 'evil)
+(evil-mode 1)

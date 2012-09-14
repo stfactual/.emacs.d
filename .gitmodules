@@ -19,3 +19,6 @@
 [submodule "swankr"]
 	path = swankr
 	url = https://github.com/stfactual/swankr.git
+[submodule "evil"]
+	path = evil
+	url = ./evil
