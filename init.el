@@ -522,3 +522,16 @@ vi style of % jumping to matching brace."
 
 (require 'evil)
 (evil-mode 1)
+
+(defun kill-start-of-line ()
+  "kill from point to start of line"
+  (interactive)
+  (kill-line 0))
+
+(defun save-and-kill-buffer ()
+  (interactive)
+  (save-current-buffer)
+  (kill-buffer (current-buffer)))
+
+(define-key evil-insert-state-map (kbd "C-u") 'kill-start-of-line)
+(define-key evil-normal-state-map "q" 'save-and-kill-buffer)
