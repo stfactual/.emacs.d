@@ -535,3 +535,5 @@ vi style of % jumping to matching brace."
 
 (define-key evil-insert-state-map (kbd "C-u") 'kill-start-of-line)
 (define-key evil-normal-state-map "q" 'save-and-kill-buffer)
+
+(require 'undo-tree)
