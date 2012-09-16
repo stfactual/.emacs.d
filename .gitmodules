@@ -21,4 +21,7 @@
 	url = https://github.com/stfactual/swankr.git
 [submodule "evil"]
 	path = evil
-	url = ./evil
+	url = git://gitorious.org/evil/evil.git
+[submodule "undo-tree"]
+	path = undo-tree
+	url = http://www.dr-qubit.org/git/undo-tree.git
