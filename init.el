@@ -463,55 +463,6 @@ Leave one space or none, according to the context."
   ;; http://www.mail-archive.com/help-gnu-emacs@gnu.org/msg03577.html
   ))
 
-(defun goto-match-paren (arg)
-  "Go to the matching parenthesis if on parenthesis AND last command is a movement command, otherwise insert %.
-vi style of % jumping to matching brace."
-  (interactive "p")
-  (message "%s" last-command)
-  (if (not (memq last-command '(
-                                set-mark
-                                cua-set-mark
-                                goto-match-paren
-                                down-list
-                                up-list
-                                end-of-defun
-                                beginning-of-defun
-                                backward-sexp
-                                forward-sexp
-                                backward-up-list
-                                forward-paragraph
-                                backward-paragraph
-                                end-of-buffer
-                                beginning-of-buffer
-                                backward-word
-                                forward-word
-                                mwheel-scroll
-                                backward-word
-                                forward-word
-                                mouse-start-secondary
-                                mouse-yank-secondary
-                                mouse-secondary-save-then-kill
-                                move-end-of-line
-                                move-beginning-of-line
-                                backward-char
-                                forward-char
-                                scroll-up
-                                scroll-down
-                                scroll-left
-                                scroll-right
-                                mouse-set-point
-                                next-buffer
-                                previous-buffer
-                                )
-                 ))
-      (self-insert-command (or arg 1))
-    (cond ((looking-at "\\s\(") (forward-list 1) (backward-char 1))
-          ((looking-at "\\s\)") (forward-char 1) (backward-list 1))
-          (t (self-insert-command (or arg 1))))))
-
-;; Used only when not in viper mode
-; (global-set-key (kbd "%") 'goto-match-paren)
-
 (setq scroll-step 1)
 (setq scroll-conservatively 10000)
 (setq auto-window-vscroll nil)
@@ -524,9 +475,13 @@ vi style of % jumping to matching brace."
 (evil-mode 1)
 
 (defun kill-start-of-line ()
-  "kill from point to start of line"
+  "kill from point to start of line. If at the beginning of the line, kill line break."
   (interactive)
-  (kill-line 0))
+  (if (bolp)
+    (progn
+      (move-end-of-line 0)
+      (kill-line))
+    (kill-line 0)))
 
 (defun save-and-kill-buffer ()
   (interactive)
@@ -535,5 +490,12 @@ vi style of % jumping to matching brace."
 
 (define-key evil-insert-state-map (kbd "C-u") 'kill-start-of-line)
 (define-key evil-normal-state-map "q" 'save-and-kill-buffer)
+
+(defun evil-universal-key (key binding)
+  (define-key evil-insert-state-map key binding)
+  (define-key evil-normal-state-map key binding))
+
+(evil-universal-key (kbd "M-.") 'slime-edit-definition)
+(evil-universal-key (kbd "M-,") 'slime-pop-find-definition-stack)
 
 (require 'undo-tree)
