@@ -224,18 +224,20 @@ it to the beginning of the line."
 
 (setq slime-net-coding-system 'utf-8-unix)
 
+(defun randomized-slime-port ()
+  (+ 3000 (mod (emacs-pid) 5000)))
+
 (defun lein-swank ()
   (interactive)
-  (let ((root (locate-dominating-file default-directory "project.clj")))
+  (let ((root       (locate-dominating-file default-directory "project.clj")))
     (when (not root)
       (error "Not in a Leiningen project."))
-    ;; you can customize slime-port using .dir-locals.el
-    (shell-command (format "source ~/.bashrc && cd %s && lein swank %s &" root slime-port)
+    (shell-command (format "source ~/.bashrc && cd %s && lein swank %s &" root (randomized-slime-port))
                    "*lein-swank*")
     (set-process-filter (get-buffer-process "*lein-swank*")
                         (lambda (process output)
                           (when (string-match "Connection opened on" output)
-                            (slime-connect "localhost" slime-port)
+                            (slime-connect "localhost" (randomized-slime-port))
                             (set-process-filter process nil))))
     (message "Starting lein-swank server...")))
 
