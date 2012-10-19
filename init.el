@@ -242,7 +242,7 @@ it to the beginning of the line."
     (message "Starting lein-swank server...")))
 
 (defun lein-swank () (interactive) (run-lein-swank (lambda (x) (format "%s &" x)) "localhost"))
-(defun lein-ssh-swank () (interactive) (run-lein-swank (lambda (x) (format "ssh $dev101 \"%s\" &" x))
+(defun lein-ssh-swank () (interactive) (run-lein-swank (lambda (x) (format "ssh %s \"%s\" &" (getenv "dev101") x))
                                                        (getenv "dev101_host")))
 
 (defun kill-lein-swank ()
