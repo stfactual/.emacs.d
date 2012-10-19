@@ -396,30 +396,6 @@ Leave one space or none, according to the context."
 
 (setq-default c-basic-offset 2)
 
-;; R-swank setup
-(add-hook 'ess-mode-hook
-  (lambda ()
-    (setq defun-prompt-regexp "^\\(\\(\\sw\\|\\s_\\)+\\|\\s\"\\S\"+\\s\"\\)\\s-*\\(=\\|<-\\)\\s-*function\\s-*(.*)\\s-*")))
-
-(defun r-swank ()
-  (interactive)
-  (shell-command (format "source ~/.bashrc && cd %s && R --no-save <<<\"source('%s/.emacs.d/swankr/swank.R', keep.source=TRUE, chdir=TRUE)\nstartSwank('%s')\n\" &" default-directory (getenv "HOME") slime-port)
-                 "*r-swank*")
-  (set-process-filter (get-buffer-process "*r-swank*")
-                        (lambda (process output)
-                          (when (string-match "startSwank" output)
-                            (slime-connect "localhost" slime-port)
-                            (set-process-filter process nil))))
-  (message "Starting r-swank server..."))
-
-(defun kill-r-swank ()
-  (interactive)
-  (kill-process (get-buffer-process "*r-swank*"))
-  (message "Stopping r-swank server..."))
-
-(global-set-key (kbd "s--") 'r-swank)
-(global-set-key (kbd "s-_") 'kill-r-swank)
-
 (defun find-word-under-cursor (arg)
   (interactive "p")
   (if (looking-at "\\<") () (re-search-backward "\\<" (point-min)))
