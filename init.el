@@ -227,19 +227,23 @@ it to the beginning of the line."
 (defun randomized-slime-port ()
   (+ 3000 (mod (emacs-pid) 5000)))
 
-(defun lein-swank ()
+(defun run-lein-swank (wrap-command remote-host)
   (interactive)
-  (let ((root       (locate-dominating-file default-directory "project.clj")))
+  (let ((root (locate-dominating-file default-directory "project.clj")))
     (when (not root)
       (error "Not in a Leiningen project."))
-    (shell-command (format "source ~/.bashrc && cd %s && lein swank %s &" root (randomized-slime-port))
+    (shell-command (funcall wrap-command (format "source ~/.bashrc && cd %s && lein swank %s" root (randomized-slime-port)))
                    "*lein-swank*")
     (set-process-filter (get-buffer-process "*lein-swank*")
                         (lambda (process output)
                           (when (string-match "Connection opened on" output)
-                            (slime-connect "localhost" (randomized-slime-port))
+                            (slime-connect remote-host (randomized-slime-port))
                             (set-process-filter process nil))))
     (message "Starting lein-swank server...")))
+
+(defun lein-swank () (interactive) (run-lein-swank (lambda (x) (format "%s &" x)) "localhost"))
+(defun lein-ssh-swank () (interactive) (run-lein-swank (lambda (x) (format "ssh $dev101 \"%s\" &" x))
+                                                       (getenv "dev101_host")))
 
 (defun kill-lein-swank ()
   (interactive)
@@ -247,6 +251,7 @@ it to the beginning of the line."
   (message "Stopping lein-swank server..."))
 
 (global-set-key (kbd "s-=") 'lein-swank)
+(global-set-key (kbd "M-s-=") 'lein-ssh-swank)
 (global-set-key (kbd "s-+") 'kill-lein-swank)
 
 (fset 'slime-repl-set-default-package
