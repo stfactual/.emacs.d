@@ -61,6 +61,8 @@
   (add-hook (first (read-from-string (concat (symbol-name mode) "-mode-hook")))
             (lambda ()
             (paredit-mode 1)
+            (local-set-key (kbd "<C-left>") 'backward-sexp)
+            (local-set-key (kbd "<C-right>") 'forward-sexp)
 ;;            (local-set-key (kbd "<M-left>") 'paredit-convolute-sexp)
 ;;            (auto-complete-mode 1)
 )))
@@ -103,7 +105,7 @@
             (("\\[\\|\\]"          . 'clojure-braces))
             ((":\\w+"              . 'clojure-keyword))
             (("#?\""               0 'clojure-double-quote prepend))
-            (("nil\\|true\\|false\\|%[1-9]?" . 'clojure-special))
+            (("\\<nil\\>\\|\\<true\\>\\|\\<false\\>\\|\\<%[1-9]?\\>" . 'clojure-special))
             (("(\\(\\.[^ \n)]*\\|[^ \n)]+\\.\\|new\\)\\([ )\n]\\|$\\)" 1 'clojure-java-call)))))
 
 (add-hook 'clojure-mode-hook 'tweak-clojure-syntax)
@@ -219,6 +221,23 @@ it to the beginning of the line."
                                                (match-end 1)
                                                ?λ))))))
 
+;; Pretty clojure symbols (disabled for now)
+(defun keyword-transform (pattern char)
+  `(,pattern (0 (prog1 () (compose-region (match-beginning 1)
+                                          (match-end 1)
+                                          ,char)))))
+
+(font-lock-add-keywords 'clojure-mode
+                        (list (keyword-transform "\\(;\\+\\)" ?·)))
+
+(when nil
+  (font-lock-add-keywords 'clojure-mode
+                          (list (keyword-transform "(\\(map \\)" ?·)
+                                (keyword-transform "(\\(mapcat \\)" ?≫)
+                                (keyword-transform "(\\(constantly \\)" ?κ)
+                                (keyword-transform "(\\(reduce \\)" ?∫)
+                                (keyword-transform "(\\(let \\)" ?∟))))
+
 ;; turn off scroll-bars
 (scroll-bar-mode -1)
 
@@ -227,7 +246,7 @@ it to the beginning of the line."
 (defun randomized-slime-port ()
   (+ 3000 (mod (emacs-pid) 5000)))
 
-(defun run-lein-swank (wrap-command remote-host)
+(defun run-lein-swank (wrap-command)
   (interactive)
   (let ((root (locate-dominating-file default-directory "project.clj")))
     (when (not root)
@@ -237,13 +256,20 @@ it to the beginning of the line."
     (set-process-filter (get-buffer-process "*lein-swank*")
                         (lambda (process output)
                           (when (string-match "Connection opened on" output)
-                            (slime-connect remote-host (randomized-slime-port))
+                            (slime-connect "localhost" (randomized-slime-port))
                             (set-process-filter process nil))))
     (message "Starting lein-swank server...")))
 
-(defun lein-swank () (interactive) (run-lein-swank (lambda (x) (format "%s &" x)) "localhost"))
-(defun lein-ssh-swank () (interactive) (run-lein-swank (lambda (x) (format "ssh %s \"%s\" &" (getenv "dev101") x))
-                                                       (getenv "dev101_host")))
+(defun lein-swank ()
+  (interactive)
+  (run-lein-swank (lambda (x) (format "%s &" x))))
+
+(defun lein-ssh-swank ()
+  (interactive)
+  ;; Use SSH port forwarding on the slime port
+  (run-lein-swank (lambda (x) (format "ssh -L%s:%s:%s %s \"%s\" &"
+                                 (randomized-slime-port) (getenv "dev101_host") (randomized-slime-port)
+                                 (getenv "dev101") x))))
 
 (defun kill-lein-swank ()
   (interactive)
@@ -262,6 +288,8 @@ it to the beginning of the line."
   (execute-kbd-macro 'slime-repl-set-default-package)
   (slime-switch-to-output-buffer)
   (insert "(use 'clojure.repl)")
+  (slime-repl-return)
+  (insert "(use 'clojure.pprint)")
   (slime-repl-return))
 
 (defun slime-save-compile-and-load-file ()
@@ -383,6 +411,19 @@ Leave one space or none, according to the context."
 (require 'fill-column-indicator)
 (setq fci-rule-color "#222222")
 
+(defun setup-three-windows ()
+  (interactive)
+  (split-window-horizontally)
+  (split-window-horizontally)
+  (balance-windows-area))
+
+(defun set-window-width ()
+  (interactive)
+  (enlarge-window (- 101 (window-width)) 'horizontal))
+
+(global-set-key (kbd "C-x #") 'setup-three-windows)
+(global-set-key (kbd "C-x @") 'set-window-width)
+
 (custom-set-variables
   ;; custom-set-variables was added by Custom.
   ;; If you edit it by hand, you could mess it up, so be careful.
@@ -393,11 +434,14 @@ Leave one space or none, according to the context."
  '(tool-bar-mode nil))
 
 (add-to-list 'default-frame-alist '(width . 214))
-(add-to-list 'default-frame-alist '(alpha 97 15))
+(add-to-list 'default-frame-alist '(alpha 90 90))
 (add-to-list 'default-frame-alist '(background-color . "black"))
 
 (add-hook 'prog-mode-hook 'auto-fill-mode)
 (add-hook 'prog-mode-hook 'fci-mode)
+
+(add-hook 'text-mode-hook 'auto-fill-mode)
+(add-hook 'text-mode-hook 'fci-mode)
 
 (setq-default c-basic-offset 2)
 
@@ -482,3 +526,5 @@ Leave one space or none, according to the context."
 (evil-universal-key (kbd "M-,") 'slime-pop-find-definition-stack)
 
 (require 'undo-tree)
+
+(setq js-indent-level 2)
