@@ -25,3 +25,12 @@
 [submodule "undo-tree"]
 	path = undo-tree
 	url = http://www.dr-qubit.org/git/undo-tree.git
+[submodule "smex"]
+  path = smex
+  url = https://github.com/nonsequitur/smex.git
+[submodule "fold-dwim-org"]
+  path = fold-dwim-org
+  url = git@github.com:emacsmirror/fold-dwim-org.git
+[submodule "fold-dwim"]
+  path = fold-dwim
+  url = git@github.com:emacsmirror/fold-dwim.git

@@ -1,5 +1,18 @@
 ;; turn off emacs startup message
 (setq inhibit-startup-message t)
+
+;; not necessary for OS X
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+
+;; make transparent if the window manager supports it
+(add-to-list 'default-frame-alist '(alpha 85 75))
+
+(setq frame-title-format '("%f"))
+
+;; allow emacsclient to open files in a running emacs
+(server-start)
+
 ;; do not wrap lines
 (setq-default truncate-lines t)
 
@@ -8,15 +21,90 @@
 (setq-default indent-tabs-mode nil)
 (setq-default fill-column 100)
 
-;;; This was installed by package-install.el.
-;;; This provides support for the package system and
-;;; interfacing with ELPA, the package archive.
-;;; Move this code earlier if you want to reference
-;;; packages in your .emacs.
-(when
-    (load
-     (expand-file-name "~/.emacs.d/elpa/package.el"))
-  (package-initialize))
+;; show column numbers
+(setq column-number-mode t)
+
+;; turn off scroll-bars
+(scroll-bar-mode -1)
+
+(put 'scroll-left 'disabled nil)
+
+;; personally, I can do without all those ~ files
+(setq make-backup-files nil)
+
+(add-hook 'before-save-hook 'whitespace-cleanup)
+
+;; undo/redo pane configuration with C-c left/right arrow
+(winner-mode 1)
+
+(defun toggle-fullscreen (&optional f)
+  (interactive)
+  (let ((current-value (frame-parameter nil 'fullscreen)))
+    (set-frame-parameter nil 'fullscreen
+     (if (equal 'fullboth current-value)
+         (if (boundp 'old-fullscreen) old-fullscreen nil)
+       (progn (setq old-fullscreen current-value)
+              'fullboth)))))
+
+(if (eq system-type 'darwin)
+  (progn
+    (global-set-key (kbd "M-RET") 'ns-toggle-fullscreen)
+    (global-set-key (kbd "<s-wheel-up>") 'text-scale-increase)
+    (global-set-key (kbd "<s-wheel-down>") 'text-scale-decrease))
+
+  ;; linux
+  (progn
+    (global-set-key (kbd "M-RET") 'toggle-fullscreen)
+    (global-set-key (kbd "<s-mouse-4>") 'text-scale-increase)
+    (global-set-key (kbd "<s-double-mouse-4>") 'text-scale-increase)
+    (global-set-key (kbd "<s-triple-mouse-4>") 'text-scale-increase)
+    (global-set-key (kbd "<s-mouse-5>") 'text-scale-decrease)
+    (global-set-key (kbd "<s-double-mouse-5>") 'text-scale-decrease)
+    (global-set-key (kbd "<s-triple-mouse-5>") 'text-scale-decrease)
+
+    (global-set-key (kbd "s-s") 'save-buffer)
+    (global-set-key (kbd "s-x") 'clipboard-kill-region)
+    (global-set-key (kbd "s-c") 'clipboard-kill-ring-save)
+    (global-set-key (kbd "s-v") 'clipboard-yank)
+    (global-set-key (kbd "s-f") 'isearch-forward)
+    (global-set-key (kbd "s-g") 'isearch-repeat-forward)
+    (global-set-key (kbd "s-z") 'undo)
+    (global-set-key (kbd "s-q") 'save-buffers-kill-terminal)))
+
+(global-set-key [f5] 'revert-buffer)
+(global-set-key [f12] 'other-window)
+
+(global-set-key (kbd "<s-right>") 'other-window)
+(global-set-key (kbd "<s-left>") '(lambda () "backwards other-window" (interactive) (other-window -1)))
+
+(global-set-key (kbd "C-c c") 'toggle-truncate-lines)
+(global-set-key (kbd "C-c ;") 'comment-or-uncomment-region)
+
+;; keyboard macro key bindings
+(global-set-key (kbd "C-,")        'kmacro-start-macro-or-insert-counter)
+(global-set-key (kbd "C-.")        'kmacro-end-or-call-macro)
+
+(defun find-init-file ()
+  "Visit init.el."
+  (interactive)
+  (find-file "~/.emacs.d/init.el"))
+
+(global-set-key (kbd "s-i") 'find-init-file)
+(global-set-key (kbd "s-I") 'eval-buffer)
+
+(global-set-key (kbd "s-{") 'shrink-window-horizontally)
+(global-set-key (kbd "s-}") 'enlarge-window-horizontally)
+(global-set-key (kbd "s-[") 'shrink-window)
+(global-set-key (kbd "s-]") 'enlarge-window)
+
+(custom-set-faces
+  ;; custom-set-faces was added by Custom.
+  ;; If you edit it by hand, you could mess it up, so be careful.
+  ;; Your init file should contain only one such instance.
+  ;; If there is more than one, they won't work right.
+ (if (eq system-type 'darwin)
+   '(default ((t (:height 140))))
+   '(default ((t (:height 110))))))
 
 ;; add all subdirs of ~/.emacs.d to your load-path
 (add-to-list 'load-path "~/.emacs.d")
@@ -31,32 +119,54 @@
 (load-file "~/.emacs.d/color-theme/themes/wombat.el")
 (color-theme-wombat)
 
+<<<<<<< HEAD
 ;; default frame size
 ;(add-to-list 'default-frame-alist (cons 'height 24))
 ;(add-to-list 'default-frame-alist (cons 'width 80))
 ;(add-to-list 'default-frame-alist '(alpha 85 75))
+=======
+;; TODO: is something similar to this hack needed for nrepl?
+;; printing strings in slime with unusual characters crashes without this
+;;(setq slime-net-coding-system 'utf-8-unix)
+>>>>>>> c9d8f89a2727b3aa07019b1620794411b6d334b3
 
-;; f5
-(global-set-key [f5] 'revert-buffer)
+(require 'package)
+(add-to-list 'package-archives
+             '("marmalade" . "http://marmalade-repo.org/packages/"))
+(package-initialize)
+
+(let (refreshed)
+  (dolist (package '(clojure-mode clojure-test-mode nrepl auto-complete ac-nrepl))
+    (unless (package-installed-p package)
+      (when (not refreshed)
+        (package-refresh-contents)
+        (setq refreshed t))
+      (package-install package))))
 
 ;; load clojure mode
 (require 'clojure-mode)
 
-;; load slime
-(eval-after-load "slime"
-  '(progn (slime-setup '(slime-repl))
-          (setq slime-protocol-version 'ignore)))
+;; auto-complete-mode
+(require 'auto-complete-config)
+(ac-config-default)
 
-(require 'slime)
-(require 'slime-repl)
+(require 'ac-nrepl)
+(add-hook 'nrepl-mode-hook 'ac-nrepl-setup)
+(add-hook 'nrepl-interaction-mode-hook 'ac-nrepl-setup)
+(eval-after-load "auto-complete"
+'(add-to-list 'ac-modes 'nrepl-mode))
 
-;; load clojure test mode
-(autoload 'clojure-test-mode "clojure-test-mode" "Clojure test mode" t)
-(autoload 'clojure-test-maybe-enable "clojure-test-mode" "" t)
-(add-hook 'clojure-mode-hook 'clojure-test-maybe-enable)
+(define-key nrepl-interaction-mode-map (kbd "C-c C-d") 'ac-nrepl-popup-doc)
 
-;; load paredit
+(add-hook 'nrepl-interaction-mode-hook
+  'nrepl-turn-on-eldoc-mode)
+
+;; indent let? the same as let
+(define-clojure-indent
+  (let? 1))
+
 (require 'paredit)
+<<<<<<< HEAD
 (dolist (mode '(clojure emacs-lisp lisp scheme lisp-interaction))
   (add-hook (first (read-from-string (concat (symbol-name mode) "-mode-hook")))
             (lambda ()
@@ -66,25 +176,55 @@
 ;;            (local-set-key (kbd "<M-left>") 'paredit-convolute-sexp)
 ;;            (auto-complete-mode 1)
 )))
+=======
+>>>>>>> c9d8f89a2727b3aa07019b1620794411b6d334b3
 
-;; correctly tab defprotocols, etc
+;; Toggle fold-dwim-org mode with C-tab.
+;; While fold-dwim-org mode is enabled:
+;;  tab shows/hides block,
+;;  S-tab shows/hides all blocks.
+(require 'fold-dwim-org)
+(global-set-key (kbd "<C-tab>") 'fold-dwim-org/minor-mode)
 
-;; (custom-set-variables
-;;  ;; custom-set-variables was added by Custom.
-;;  ;; If you edit it by hand, you could mess it up, so be careful.
-;;  ;; Your init file should contain only one such instance.
-;;  ;; If there is more than one, they won't work right.
-;;  '(clojure-mode-use-backtracking-indent t)
-;;  '(show-paren-mode t))
+;; supports fold-dwim-org
+;; add separately from other lispish mode hooks because it messes up the nrepl buffer
+(add-hook 'clojure-mode-hook 'hs-minor-mode)
+
+(defun forward-select-sexp ()
+  "Select sexp after point."
+  (interactive)
+  ;; skip comments
+  (paredit-forward)
+  (paredit-backward)
+  (set-mark (point))
+  (paredit-forward))
+
+(defun backward-select-sexp ()
+  "Select sexp before point."
+  (interactive)
+  ;; skip comments
+  (paredit-backward)
+  (paredit-forward)
+  (set-mark (point))
+  (paredit-backward))
 
 ;; rainbow parentheses
 (require 'highlight-parentheses)
 (add-hook 'clojure-mode-hook '(lambda () (highlight-parentheses-mode 1)))
-(setq hl-paren-colors
-      '("orange1" "yellow1" "greenyellow" "green1"
-        "springgreen1" "cyan1" "slateblue1" "magenta1" "purple"))
+ (setq hl-paren-colors
+       '("orange1" "yellow1" "greenyellow" "green1"
+         "springgreen1" "cyan1" "slateblue1" "magenta1" "purple"))
 
-;; magic, haven't broken this down yet
+(dolist (mode '(clojure nrepl emacs-lisp lisp scheme lisp-interaction))
+  (add-hook (first (read-from-string (concat (symbol-name mode) "-mode-hook")))
+            (lambda ()
+            (highlight-parentheses-mode 1)
+            (paredit-mode 1)
+            (local-set-key (kbd "<M-left>") 'paredit-convolute-sexp)
+            (local-set-key (kbd "<C-M-s-right>") 'forward-select-sexp)
+            (local-set-key (kbd "<C-M-s-left>") 'backward-select-sexp)
+            )))
+
 (defmacro defclojureface (name color desc &optional others)
   `(defface ,name '((((class color)) (:foreground ,color ,@others))) ,desc :group 'faces))
 
@@ -110,18 +250,6 @@
 
 (add-hook 'clojure-mode-hook 'tweak-clojure-syntax)
 
-;;macros
-(global-set-key (kbd "C-,")        'kmacro-start-macro-or-insert-counter)
-(global-set-key (kbd "C-.")        'kmacro-end-or-call-macro)
-(global-set-key (kbd "<C-return>") 'apply-macro-to-region-lines)
-
-(add-hook 'before-save-hook 'whitespace-cleanup)
-
-(setq frame-title-format '("%f"))
-
-(eval-after-load 'slime-repl-mode
-  '(progn (define-key slime-repl-mode-map (kbd "<C-return>") nil)))
-
 (defun smart-line-beginning ()
   "Move point to the beginning of text
 on the current line; if that is already
@@ -135,6 +263,7 @@ it to the beginning of the line."
 
 (global-set-key "\C-a" 'smart-line-beginning)
 
+<<<<<<< HEAD
 ;; auto-complete-mode
 (require 'auto-complete-config)
 (ac-config-default)
@@ -195,17 +324,17 @@ it to the beginning of the line."
                 :inverse-video nil :box nil :strike-through nil :overline nil
                 :underline nil :slant normal :weight normal :height 70 :width normal
                 :foundry "unknown" :family "Monospace")))))
+=======
+>>>>>>> c9d8f89a2727b3aa07019b1620794411b6d334b3
 
 ;; enable awesome file prompting
-(when (> emacs-major-version 21)
-  (ido-mode t)
-  (setq ido-enable-prefix nil
-        ido-enable-flex-matching t
-        ido-create-new-buffer 'always
-        ido-use-filename-at-point t
-        ido-max-prospects 10))
+(ido-mode t)
+(setq ido-enable-prefix nil
+      ido-enable-flex-matching t
+      ido-create-new-buffer 'always
+;     ido-use-filename-at-point t
+      ido-max-prospects 10)
 
-;; https://github.com/nonsequitur/smex/
 ;; smex: ido for M-x
 (require 'smex)
 (smex-initialize)
@@ -221,6 +350,7 @@ it to the beginning of the line."
                                                (match-end 1)
                                                ?λ))))))
 
+<<<<<<< HEAD
 ;; Pretty clojure symbols (disabled for now)
 (defun keyword-transform (pattern char)
   `(,pattern (0 (prog1 () (compose-region (match-beginning 1)
@@ -291,30 +421,40 @@ it to the beginning of the line."
   (slime-repl-return)
   (insert "(use 'clojure.pprint)")
   (slime-repl-return))
+=======
+(defun ensure-three-windows ()
+  (let ((c (length (window-list))))
+    (cond ((eq c 1) (progn (split-window-horizontally)
+                           (ensure-three-windows)))
+          ((eq c 2) (progn (other-window 1)
+                           (split-window-vertically)
+                           (other-window -1))))))
 
-(defun slime-save-compile-and-load-file ()
+(defun start-nrepl ()
+  (interactive)
+  (ensure-three-windows)
+  (nrepl-restart))
+
+(global-set-key (kbd "s-=") 'start-nrepl)
+>>>>>>> c9d8f89a2727b3aa07019b1620794411b6d334b3
+
+(defun nrepl-set-ns-switch-to-repl-buffer ()
+  (interactive)
+  (nrepl-set-ns (nrepl-current-ns))
+  (nrepl-switch-to-repl-buffer))
+
+(defun nrepl-save-and-load-current-buffer ()
   (interactive)
   (save-buffer)
-  (slime-compile-and-load-file))
+  (nrepl-load-current-buffer))
 
-(defun slime-save-compile-defun ()
-  (interactive)
-  (save-buffer)
-  (slime-compile-defun)
-  (slime-switch-to-output-buffer))
+(defun nrepl-custom-keys ()
+  (define-key nrepl-interaction-mode-map (kbd "C-c C-n") 'nrepl-set-ns-switch-to-repl-buffer)
+  (define-key nrepl-interaction-mode-map (kbd "C-c C-k") 'nrepl-save-and-load-current-buffer)
+  (define-key nrepl-mode-map (kbd "<s-up>") 'nrepl-backward-input)
+  (define-key nrepl-mode-map (kbd "<s-down>") 'nrepl-forward-input))
 
-(defun slime-custom-keys ()
-  (define-key slime-mode-map (kbd "C-c C-k") 'slime-save-compile-and-load-file)
-  (define-key slime-mode-map (kbd "C-c C-c") 'slime-save-compile-defun)
-  (define-key slime-mode-map (kbd "C-c C-n") 'slime-set-default-package-switch-to-repl))
-
-(add-hook 'slime-mode-hook 'slime-custom-keys)
-
-(defun slime-custom-repl-keys ()
-  (define-key slime-repl-mode-map (kbd "<s-up>") 'slime-repl-backward-input)
-  (define-key slime-repl-mode-map (kbd "<s-down>") 'slime-repl-forward-input))
-
-(add-hook 'slime-repl-mode-hook 'slime-custom-repl-keys)
+(add-hook 'nrepl-mode-hook 'nrepl-custom-keys)
 
 (defun squeeze-whitespace ()
   "Squeeze white space (including new lines) between objects around point.
@@ -329,6 +469,7 @@ Leave one space or none, according to the context."
 
 (global-set-key (kbd "s-6") 'squeeze-whitespace)
 
+<<<<<<< HEAD
 (defun insert-line-numbers (beg end &optional start-line)
   "Insert line numbers into buffer."
   (interactive "r")
@@ -528,3 +669,12 @@ Leave one space or none, according to the context."
 (require 'undo-tree)
 
 (setq js-indent-level 2)
+=======
+(require 'ace-jump-mode)
+;; C-c SPC and C-c C-SPC are ace-jump-word-mode
+;; C-u C-c SPC and C-u C-c C-SPC and s-SPC are ace-jump-char-mode
+;; C-u C-u C-c SPC and C-u C-u C-c C-SPC are ace-jump-line-mode
+(global-set-key (kbd "C-c SPC") 'ace-jump-mode)
+(global-set-key (kbd "C-c C-SPC") 'ace-jump-mode)
+(global-set-key (kbd "s-SPC") 'ace-jump-char-mode)
+>>>>>>> c9d8f89a2727b3aa07019b1620794411b6d334b3
