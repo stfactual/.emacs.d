@@ -119,16 +119,9 @@
 (load-file "~/.emacs.d/color-theme/themes/wombat.el")
 (color-theme-wombat)
 
-<<<<<<< HEAD
-;; default frame size
-;(add-to-list 'default-frame-alist (cons 'height 24))
-;(add-to-list 'default-frame-alist (cons 'width 80))
-;(add-to-list 'default-frame-alist '(alpha 85 75))
-=======
 ;; TODO: is something similar to this hack needed for nrepl?
 ;; printing strings in slime with unusual characters crashes without this
-;;(setq slime-net-coding-system 'utf-8-unix)
->>>>>>> c9d8f89a2727b3aa07019b1620794411b6d334b3
+(setq slime-net-coding-system 'utf-8-unix)
 
 (require 'package)
 (add-to-list 'package-archives
@@ -166,7 +159,6 @@
   (let? 1))
 
 (require 'paredit)
-<<<<<<< HEAD
 (dolist (mode '(clojure emacs-lisp lisp scheme lisp-interaction))
   (add-hook (first (read-from-string (concat (symbol-name mode) "-mode-hook")))
             (lambda ()
@@ -176,8 +168,6 @@
 ;;            (local-set-key (kbd "<M-left>") 'paredit-convolute-sexp)
 ;;            (auto-complete-mode 1)
 )))
-=======
->>>>>>> c9d8f89a2727b3aa07019b1620794411b6d334b3
 
 ;; Toggle fold-dwim-org mode with C-tab.
 ;; While fold-dwim-org mode is enabled:
@@ -263,7 +253,6 @@ it to the beginning of the line."
 
 (global-set-key "\C-a" 'smart-line-beginning)
 
-<<<<<<< HEAD
 ;; auto-complete-mode
 (require 'auto-complete-config)
 (ac-config-default)
@@ -324,8 +313,6 @@ it to the beginning of the line."
                 :inverse-video nil :box nil :strike-through nil :overline nil
                 :underline nil :slant normal :weight normal :height 70 :width normal
                 :foundry "unknown" :family "Monospace")))))
-=======
->>>>>>> c9d8f89a2727b3aa07019b1620794411b6d334b3
 
 ;; enable awesome file prompting
 (ido-mode t)
@@ -350,7 +337,6 @@ it to the beginning of the line."
                                                (match-end 1)
                                                ?λ))))))
 
-<<<<<<< HEAD
 ;; Pretty clojure symbols (disabled for now)
 (defun keyword-transform (pattern char)
   `(,pattern (0 (prog1 () (compose-region (match-beginning 1)
@@ -373,70 +359,11 @@ it to the beginning of the line."
 
 (setq slime-net-coding-system 'utf-8-unix)
 
-(defun randomized-slime-port ()
-  (+ 3000 (mod (emacs-pid) 5000)))
-
-(defun run-lein-swank (wrap-command)
-  (interactive)
-  (let ((root (locate-dominating-file default-directory "project.clj")))
-    (when (not root)
-      (error "Not in a Leiningen project."))
-    (shell-command (funcall wrap-command (format "source ~/.bashrc && cd %s && lein swank %s" root (randomized-slime-port)))
-                   "*lein-swank*")
-    (set-process-filter (get-buffer-process "*lein-swank*")
-                        (lambda (process output)
-                          (when (string-match "Connection opened on" output)
-                            (slime-connect "localhost" (randomized-slime-port))
-                            (set-process-filter process nil))))
-    (message "Starting lein-swank server...")))
-
-(defun lein-swank ()
-  (interactive)
-  (run-lein-swank (lambda (x) (format "%s &" x))))
-
-(defun lein-ssh-swank ()
-  (interactive)
-  ;; Use SSH port forwarding on the slime port
-  (run-lein-swank (lambda (x) (format "ssh -L%s:%s:%s %s \"%s\" &"
-                                 (randomized-slime-port) (getenv "dev101_host") (randomized-slime-port)
-                                 (getenv "dev101") x))))
-
-(defun kill-lein-swank ()
-  (interactive)
-  (kill-process (get-buffer-process "*lein-swank*"))
-  (message "Stopping lein-swank server..."))
-
-(global-set-key (kbd "s-=") 'lein-swank)
-(global-set-key (kbd "M-s-=") 'lein-ssh-swank)
-(global-set-key (kbd "s-+") 'kill-lein-swank)
-
-(fset 'slime-repl-set-default-package
-  [?\C-c ?\M-p return])
-
-(defun slime-set-default-package-switch-to-repl ()
-  (interactive)
-  (execute-kbd-macro 'slime-repl-set-default-package)
-  (slime-switch-to-output-buffer)
-  (insert "(use 'clojure.repl)")
-  (slime-repl-return)
-  (insert "(use 'clojure.pprint)")
-  (slime-repl-return))
-=======
-(defun ensure-three-windows ()
-  (let ((c (length (window-list))))
-    (cond ((eq c 1) (progn (split-window-horizontally)
-                           (ensure-three-windows)))
-          ((eq c 2) (progn (other-window 1)
-                           (split-window-vertically)
-                           (other-window -1))))))
-
 (defun start-nrepl ()
   (interactive)
-  (ensure-three-windows)
   (nrepl-restart))
 
 (global-set-key (kbd "s-=") 'start-nrepl)
->>>>>>> c9d8f89a2727b3aa07019b1620794411b6d334b3
 
 (defun nrepl-set-ns-switch-to-repl-buffer ()
   (interactive)
@@ -469,7 +396,6 @@ Leave one space or none, according to the context."
 
 (global-set-key (kbd "s-6") 'squeeze-whitespace)
 
-<<<<<<< HEAD
 (defun insert-line-numbers (beg end &optional start-line)
   "Insert line numbers into buffer."
   (interactive "r")
@@ -669,12 +595,3 @@ Leave one space or none, according to the context."
 (require 'undo-tree)
 
 (setq js-indent-level 2)
-=======
-(require 'ace-jump-mode)
-;; C-c SPC and C-c C-SPC are ace-jump-word-mode
-;; C-u C-c SPC and C-u C-c C-SPC and s-SPC are ace-jump-char-mode
-;; C-u C-u C-c SPC and C-u C-u C-c C-SPC are ace-jump-line-mode
-(global-set-key (kbd "C-c SPC") 'ace-jump-mode)
-(global-set-key (kbd "C-c C-SPC") 'ace-jump-mode)
-(global-set-key (kbd "s-SPC") 'ace-jump-char-mode)
->>>>>>> c9d8f89a2727b3aa07019b1620794411b6d334b3
