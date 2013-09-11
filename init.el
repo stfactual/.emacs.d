@@ -173,8 +173,8 @@
 ;; While fold-dwim-org mode is enabled:
 ;;  tab shows/hides block,
 ;;  S-tab shows/hides all blocks.
-(require 'fold-dwim-org)
-(global-set-key (kbd "<C-tab>") 'fold-dwim-org/minor-mode)
+;;(require 'fold-dwim-org)
+;;(global-set-key (kbd "<C-tab>") 'fold-dwim-org/minor-mode)
 
 ;; supports fold-dwim-org
 ;; add separately from other lispish mode hooks because it messes up the nrepl buffer
@@ -311,7 +311,7 @@ it to the beginning of the line."
   ;; If there is more than one, they won't work right.
  '(default ((t (:inherit nil :stipple nil :background "black" :foreground "#f6f3e8"
                 :inverse-video nil :box nil :strike-through nil :overline nil
-                :underline nil :slant normal :weight normal :height 70 :width normal
+                :underline nil :slant normal :weight normal :height 78 :width normal
                 :foundry "unknown" :family "Monospace")))))
 
 ;; enable awesome file prompting
@@ -504,11 +504,9 @@ Leave one space or none, according to the context."
 (add-to-list 'default-frame-alist '(alpha 90 90))
 (add-to-list 'default-frame-alist '(background-color . "black"))
 
-(add-hook 'prog-mode-hook 'auto-fill-mode)
-(add-hook 'prog-mode-hook 'fci-mode)
-
-(add-hook 'text-mode-hook 'auto-fill-mode)
-(add-hook 'text-mode-hook 'fci-mode)
+(dolist (x '(prog-mode-hook text-mode-hook clojure-mode-hook fundamental-mode-hook))
+  (add-hook x 'auto-fill-mode)
+  (add-hook x 'fci-mode))
 
 (setq-default c-basic-offset 2)
 
@@ -589,8 +587,8 @@ Leave one space or none, according to the context."
   (define-key evil-insert-state-map key binding)
   (define-key evil-normal-state-map key binding))
 
-(evil-universal-key (kbd "M-.") 'slime-edit-definition)
-(evil-universal-key (kbd "M-,") 'slime-pop-find-definition-stack)
+(evil-universal-key (kbd "M-.") 'nrepl-jump)
+(evil-universal-key (kbd "M-,") 'nrepl-jump-back)
 
 (require 'undo-tree)
 
